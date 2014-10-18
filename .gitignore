@@ -1,0 +1,4 @@
+!doc/
+.vagrant/
+tmp/
+Dockerfile

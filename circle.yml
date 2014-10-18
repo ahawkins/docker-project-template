@@ -1,0 +1,15 @@
+machine:
+  services:
+    - docker
+
+dependencies:
+  pre:
+    - curl -L https://github.com/docker/fig/releases/download/1.0.0/fig-`uname -s`-`uname -m` > ~/bin/fig
+    - chmod +x ~/bin/fig
+    - make pull -j 4
+    - make environment
+    - make build
+
+test:
+  override:
+    - make test-ci
