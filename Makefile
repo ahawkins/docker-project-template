@@ -44,7 +44,7 @@ TAG=$(shell echo $$CIRCLE_SHA1 | cut -c 1-7)
 
 .PHONY: pull export import environment test test-ci teardown
 
-LINKS=redis elasticsearch mongo
+LINKS=redis
 DOCKER_RUN:=docker run -it $(foreach link,$(LINKS),--link $(REPO_NAME)_$(link)_1:$(link))
 
 DOCKER_CONTAINERS=$(shell docker ps -a -q)
