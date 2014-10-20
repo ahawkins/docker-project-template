@@ -7,8 +7,6 @@
 [Make]: http://www.gnu.org/software/make
 [Makefile]: makefile
 
-**Version: 3.1**
-
 This project used [Docker][], [Vagrant][], [Fig][], and [Make][]
 for building, testing, and developing docker images. [CircleCI][] is
 used to build, test, and push production ready images.
