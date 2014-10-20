@@ -11,7 +11,7 @@ This project used [Docker][], [Vagrant][], [Fig][], and [Make][]
 for building, testing, and developing docker images. [CircleCI][] is
 used to build, test, and push production ready images.
 
-The structure favors easily creating container(s) and standardizing on
+The structure favors easily creating images(s) and standardizing on
 ways to do common development tasks. [Fig][]
 orchestrates the development environment when multiple containers are
 required. [Vagrant][] encapsulates the entire environment
@@ -38,7 +38,7 @@ going. Continue reading to learn more things.
 * `/test` - the test suite
 * `/script` - provisioning, helping with deployment, misc things
 * `/vagrant` - Scripts used to provision the environment
-* `/tmp` - temporary artifacats and other things.
+* `/tmp` - temporary artifcats and other things.
 * `Makefile` - defines the minimum tasks required to build the project
 * `Vagrantfile` - Vagrant configuration
 * `fig.yml` - defines all the docker containers in the environment
@@ -74,7 +74,7 @@ environments](#development-environments) for more information.
 * `make test-ci` - Runs CI level tests
 * `make clean` - kill all things docker
 
-`make pull` and `make build` can be combined with `-j` for parrallel
+`make pull` and `make build` can be combined with `-j` for parallel
 execution. See the [makefile][] for more information.
 
 ### Building Single & Multiple Docker Images
@@ -99,12 +99,11 @@ project goes on.
 
 ## Testing & Continous Integration
 
-The [makefile][] defines `test` and `test-ci` targets. They
-start docker containers that execute tests. [CircleCI][]
-is used for CI because it has the best docker support and is better
-than jenkins. [circle.yml](circle.yml) configures the build. It
-follows the same process as described at the beginning of the readme.
-The build process looks like this:
+The [makefile][] defines `test` and `test-ci` targets. They start
+docker containers that execute tests. [CircleCI][] is used for CI
+because it has the best docker support. [circle.yml](circle.yml)
+configures the build. It follows the same process as described at the
+beginning of the readme. The build process looks like this:
 
 1. start docker
 2. pull base images
@@ -112,8 +111,8 @@ The build process looks like this:
 4. `make test-ci`
 5. `make deploy` (when on master)
 
-`overrrides` is used to ensure cricle CI does not do intefer & act on
-project semenatics. This will slow down the built and may cause it
+`overrrides` is used to ensure cricle CI does not do infer & act on
+project semantics. This will slow down the built and may cause it
 fail. See the docs on [build
 configuration](https://circleci.com/docs/configuration) for more
 information. Also see the [rationale](doc/RATIONALE.md) for the
