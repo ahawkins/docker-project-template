@@ -5,11 +5,29 @@
 
 sha1=$(shell echo $(1) | sha1sum | cut -d ' ' -f 1)
 
-BASE_IMAGES:=ruby:2.1.3 \
-						redis:latest 
-PULL_BASE_IMAGES:=$(addprefix pull/,$(subst :,_,$(BASE_IMAGES)))
-EXPORT_BASE_IMAGES:=$(addprefix export/,$(subst :,_,$(BASE_IMAGES)))
-IMPORT_BASE_IMAGES:=$(addprefix import/,$(subst :,_,$(BASE_IMAGES)))
+# Define dependent images in this variable. pull, import, and export
+# targets will be created for each. A global pull, import, and export
+# task will be created to operate on the list.
+# NOTE: relevant changes should be synced to fig.yml
+DOCKER_IMAGES:=ruby:2.1.3 redis:latest 
+
+# Template defining tasks to pull, export, and import an image. This
+# These tasks use work arounds to ensure tasks around the dependent
+# images are not executed more than once. This template is evaluated
+# for each images. Every image name is hashed. This is an artifact
+# name. The pull task creates an artfact. Other targets can use this
+# artifact as dependency. Export depends on pull, and import depends
+# on export. The clean target deletes these artifacts. Note that this
+# template is used with eval so things are expanded twice. ":"
+# characters are replaced with _ in image names so they become
+# proper task names. Given an image "a" and it's sha "b" the following
+# tasks are generated:
+#
+# tmp/images/b 		 	# pull the image and create the artifact
+# pull/a 						# helper target depending on the previous
+# tmp/images/b.tar  # generate a tar export
+# export/a:					# helper taget depending on the previous
+# import/a: 				# import a using the tar export
 
 define IMAGE_template
 tmp/images/$(call sha1,$(1)):
@@ -30,12 +48,18 @@ import/$(subst :,_,$(1)): tmp/images/$(call sha1,$(1)).tar
 .PHONY: import/$(subst :,_,$(1))
 endef
 
-$(foreach image,$(BASE_IMAGES),$(eval $(call IMAGE_template,$(image))))
+$(foreach image,$(DOCKER_IMAGES),$(eval $(call IMAGE_template,$(image))))
 
-pull: $(PULL_BASE_IMAGES)
-export: $(EXPORT_BASE_IMAGES)
-import: $(IMPORT_BASE_IMAGES)
+PULL_DOCKER_IMAGES:=$(addprefix pull/,$(subst :,_,$(DOCKER_IMAGES)))
+EXPORT_DOCKER_IMAGES:=$(addprefix export/,$(subst :,_,$(DOCKER_IMAGES)))
+IMPORT_DOCKER_IMAGES:=$(addprefix import/,$(subst :,_,$(DOCKER_IMAGES)))
 
+pull: $(PULL_DOCKER_IMAGES)
+export: $(EXPORT_DOCKER_IMAGES)
+import: $(IMPORT_DOCKER_IMAGES)
+
+# TODO: set this to your poject name. Use _ instead of -. This
+# variable is used to namespace fig and for pushing images.
 REPO_NAME=example
 FIG=fig --project-name $(REPO_NAME)
 TAG=$(shell echo $$CIRCLE_SHA1 | cut -c 1-7)
@@ -44,11 +68,11 @@ TAG=$(shell echo $$CIRCLE_SHA1 | cut -c 1-7)
 
 .PHONY: pull export import environment test test-ci teardown
 
+# Define linked containers (these name should match keys in
+# fig.ml). The test & test-ci targets wil be run with all links set
+# correctly.
 LINKS=redis
 DOCKER_RUN:=docker run -it $(foreach link,$(LINKS),--link $(REPO_NAME)_$(link)_1:$(link))
-
-DOCKER_CONTAINERS=$(shell docker ps -a -q)
-DOCKER_IMAGES=$(shell docker images -q)
 
 # Wildcard rule to build an image from a file inside dockerfiles/
 # Use the tasks like any other dependency. Order may be controller
@@ -93,10 +117,10 @@ push/% : images/%
 
 clean: teardown
 	rm -rf tmp/images
-ifneq ($(DOCKER_CONTAINERS),)
-	docker stop $(DOCKER_CONTAINERS)
-	docker rm $(DOCKER_CONTAINERS)
+ifneq ($(shell docker ps -a -q),)
+	docker stop $(shell docker ps -a -q)
+	docker rm $(shell docker ps -a -q)
 endif
-ifneq ($(DOCKER_IMAGES),)
-	docker rmi $(DOCKER_IMAGES)
+ifneq ($(shell docker images -q),)
+	docker rmi $(shell docker images -q)
 endif

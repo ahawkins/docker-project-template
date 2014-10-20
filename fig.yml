@@ -1,2 +1,3 @@
+# NOTE: changes to images should be synced back to the Makefile
 redis:
   image: redis:latest
