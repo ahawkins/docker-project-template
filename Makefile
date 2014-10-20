@@ -84,6 +84,9 @@ push/% : images/%
 	ifndef TAG
 		$(error "CIRCLE_SHA1 variable missing!")
 	endif
+	ifndef REGISTRY
+		$(error "REGISTRY missing!")
+	endif
 		docker tag $(REPO_NAME)/$(@F) $(REGISTRY)/$(REPO_NAME)/$(@F):$(TAG)
 		docker tag $(REPO_NAME)/$(@F) $(REGISTRY)/$(REPO_NAME)/$(@F):latest
 		docker push $(REGISTRY)/$(REPO_NAME)/$(@F)
