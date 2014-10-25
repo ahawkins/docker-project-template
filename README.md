@@ -24,7 +24,7 @@ Here's how to get started:
 ```
 $ vagrant up --provision
 $ vagrant ssh
-$ make environment & make test
+$ make environment && make test
 ```
 
 This will spin up the virtual machine, ssh inside it, build and start
