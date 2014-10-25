@@ -8,6 +8,7 @@ below:
 
 ```
 $ mkdir my-new-project
+$ cd my-new-project
 $ curl -L https://github.com/ahawkins/docker-project-template/tarball/master > template.tar.gz
 $ tar zxf template.tar.gz --strip-components=1 && rm template.tar.gz
 ```
